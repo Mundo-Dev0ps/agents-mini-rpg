@@ -97,9 +97,6 @@ const GOLD_DROP_VALUE = 3;
 
 function tileLabel(t: string): string {
   if (t === "M") return "🥩";
-  if (t === "F") return "🐟";
-  if (t === "G") return "🌿";
-  if (t === "L") return "🍃";
   if (t === "E") return "🔋";
   if (t === "H") return "❤️";
   return t;
@@ -772,7 +769,7 @@ export class Game {
       for (let x = Math.max(0, px - range); x <= Math.min(this.world.width - 1, px + range); x++) {
         if (Math.abs(x - px) + Math.abs(y - py) > range) continue;
         const t = this.world.tiles[y][x];
-        if (t === "%" || t === "M" || t === "G") {
+        if (t === "%" || t === "M") {
           out.push(`${x},${y}`);
         }
       }
@@ -1190,7 +1187,7 @@ export class Game {
         /* sound removed */
         return { message: `+${healed} HP` };
       }
-      if (t === "M" || t === "F" || t === "G" || t === "L" || t === "E") {
+      if (t === "M" || t === "E") {
         const cls = this.player.characterClass;
         if (!canEat(cls, t)) {
           const refusal = dietRefusal(cls, this.player.name);
@@ -1560,10 +1557,6 @@ export class Game {
     const p = this.player;
     if (tile === "M") {
       p.meat += 1;
-    } else if (tile === "F") {
-      p.fish += 1;
-    } else if (tile === "G") {
-      p.plants += 1;
     } else if (tile === "E") {
       p.batteries += 1;
       p.gainEnergy(15);

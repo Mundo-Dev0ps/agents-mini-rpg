@@ -416,11 +416,8 @@ export class Agent extends Entity {
         t === "%" ||
         t === "M" ||
         t === "+" ||
-        t === "F" ||
-        t === "G" ||
         t === "E" ||
         t === "$" ||
-        t === "L" ||
         t === "H"
       );
     }
