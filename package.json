@@ -1,0 +1,68 @@
+{
+  "name": "agent-mini-rpg",
+  "version": "0.1.0",
+  "description": "Terminal-based multi-agent RPG that mirrors live Claude Code activity via an MCP file-bridge",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "author": "agent-mini-rpg contributors",
+  "homepage": "https://github.com/Mundo-Dev0ps/agent-mini-rpg#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mundo-Dev0ps/agent-mini-rpg.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Mundo-Dev0ps/agent-mini-rpg/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "rpg",
+    "terminal",
+    "tui",
+    "claude-code",
+    "mcp",
+    "multi-agent",
+    "ansi"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "agent-rpg": "./bin/agent-rpg.js"
+  },
+  "files": [
+    "dist/",
+    "bin/",
+    "scripts/setup-mcp.ts",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && node dist/index.js",
+    "dev": "ts-node index.ts",
+    "mcp": "tsc && node dist/mcp-server.js",
+    "show-config": "tsc && node dist/show-config.js",
+    "install-mcp": "ts-node scripts/setup-mcp.ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "test": "node --require ts-node/register --test tests/*.test.ts",
+    "prepublishOnly": "npm run clean && npm run build && npm test",
+    "postinstall": "node -e \"try{require('fs').chmodSync('./bin/agent-rpg.js',0o755)}catch(e){}\""
+  },
+  "dependencies": {
+    "chalk": "^4.1.2"
+  },
+  "optionalDependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "pidusage": "^3.0.2",
+    "ps-list": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.0"
+  }
+}

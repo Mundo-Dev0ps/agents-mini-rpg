@@ -1,0 +1,8 @@
+{
+  "power_up": {
+    "hp": 25,
+    "atq": 5,
+    "note": "Claude pushed a hotfix"
+  },
+  "message": "remote sync OK"
+}

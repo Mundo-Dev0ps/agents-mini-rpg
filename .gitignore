@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local Claude Code settings (user-specific paths, hooks, perms)
+.claude/settings.local.json
+.claude/.session.json
+
+# Backup of compressed CLAUDE.md
+CLAUDE.original.md
+
+# Bridge runtime files (in $HOME, but in case anyone copies)
+.agent_rpg_sync.json
+.agent_rpg_queue.ndjson
+.agent_sync.json
+
+# Env / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
