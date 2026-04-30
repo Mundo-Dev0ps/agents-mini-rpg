@@ -1171,14 +1171,10 @@ export class Renderer {
     const t = game.world.tiles[y][x];
     if (t === "#") return game.theme.treeVariants[game.world.treeVariantAt(x, y)];
     if (t === "~") return game.theme.rockTile;
-    if (t === "w") return chalk.bgBlue(game.theme.waterTile) + RESET;
     if (t === "%") return game.theme.woodTile;
     if (t === "M") return game.theme.mode === "bugs" ? "🔋" : TILE_MEAT;
     if (t === "B") return game.theme.brickTile;
     if (t === "+") return chalk.greenBright(TILE_CURE) + RESET;
-    if (t === "L") return game.theme.mode === "bugs" ? "💾" : "🍃";
-    if (t === "F") return game.theme.mode === "bugs" ? "💿" : "🐟";
-    if (t === "G") return game.theme.mode === "bugs" ? "📡" : "🌿";
     if (t === "E") return game.theme.mode === "bugs" ? "🔋" : "🥩";
     if (t === "H") return "❤️ ";
     if (t === "T") return "🕳️ ";
@@ -1255,7 +1251,7 @@ export class Renderer {
     if (game.theme.mode === "bugs") {
       return `${wood} 🔋${p.batteries} ⚡${p.energy} ${fed}`;
     }
-    return `${wood} 🥩${p.meat} 🍃${p.mana} ${fed}`;
+    return `${wood} 🥩${p.meat} ${fed}`;
   }
 
   private compactStateBadge(

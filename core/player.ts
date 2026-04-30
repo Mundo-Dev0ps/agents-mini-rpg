@@ -35,10 +35,7 @@ export class Player extends Entity {
   maxEnergy: number;
   wood: number;
   meat: number;
-  fish: number;
-  plants: number;
   batteries: number;
-  mana: number;
   lastFedAt: number;
   lastMoveTick: number;
   pickupFlashUntil: number;
@@ -80,10 +77,7 @@ export class Player extends Entity {
     this.maxEnergy = 100;
     this.wood = 0;
     this.meat = 0;
-    this.fish = 0;
-    this.plants = 0;
     this.batteries = 0;
-    this.mana = 0;
     this.lastFedAt = Date.now();
     this.lastMoveTick = -100;
     this.pickupFlashUntil = -100;

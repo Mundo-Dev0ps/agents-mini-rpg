@@ -29,7 +29,6 @@ export interface Theme {
   treeVariants: string[];
   rockTile: string;
   woodTile: string;
-  waterTile: string;
   brickTile: string;
   npcIcon: string;
   displayAvatars: ThemeAvatar[];
@@ -79,7 +78,6 @@ export const THEMES: Record<GameMode, Theme> = {
     treeVariants: ["🌲", "🌲", "🌲"],
     rockTile: "🪨",
     woodTile: "🪵",
-    waterTile: "🌊",
     brickTile: "🧱",
     npcIcon: "👴",
     displayAvatars: [
@@ -135,7 +133,6 @@ export const THEMES: Record<GameMode, Theme> = {
     treeVariants: ["🧱", "🧱", "🧱"],
     rockTile: "🧱",
     woodTile: "🔩",
-    waterTile: "⛓️ ",
     brickTile: "🧱",
     npcIcon: "📚",
     displayAvatars: [

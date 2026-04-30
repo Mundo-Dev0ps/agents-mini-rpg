@@ -6,12 +6,8 @@ export type TileType =
   | "M"
   | "B"
   | "+"
-  | "L"
-  | "F"
-  | "G"
   | "E"
   | "$"
-  | "w"
   | "H"
   | "T";
 

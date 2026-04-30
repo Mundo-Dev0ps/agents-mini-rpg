@@ -18,10 +18,7 @@ const DEFAULT_DIST: WorldDistribution = {
 
 const ITEM_TILES: ReadonlySet<TileType> = new Set<TileType>([
   "M",
-  "G",
-  "F",
   "E",
-  "L",
   "H",
 ]);
 
@@ -148,11 +145,6 @@ export class World {
     const forestCount = Math.max(1, Math.floor(totalInterior / 110));
     this.scatterForests(grid, forestCount);
 
-    if (this.mode !== "adventure") {
-      const lakeCount = Math.max(1, Math.floor(totalInterior / 120));
-      this.scatterLakes(grid, lakeCount);
-    }
-
     const rocks = Math.floor(
       totalInterior * this.dist.treesAndRocksPct * 0.4 * DENSITY_FACTOR
     );
@@ -160,12 +152,6 @@ export class World {
 
     /* M/E/H scatter removed — items only drop from bug deaths */
     this.scatter(grid, "T", 2);
-    if (this.mode !== "adventure") {
-      this.scatterFishInWater(
-        grid,
-        Math.max(1, Math.floor(totalInterior * 0.015 * DENSITY_FACTOR))
-      );
-    }
 
     return grid;
   }
@@ -195,57 +181,6 @@ export class World {
     }
   }
 
-  private scatterLakes(grid: TileType[][], count: number): void {
-    for (let i = 0; i < count; i++) {
-      const cx = 3 + Math.floor(Math.random() * (this.width - 6));
-      const cy = 3 + Math.floor(Math.random() * (this.height - 6));
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          const nx = cx + dx;
-          const ny = cy + dy;
-          if (
-            nx <= 0 ||
-            ny <= 0 ||
-            nx >= this.width - 1 ||
-            ny >= this.height - 1
-          )
-            continue;
-          grid[ny][nx] = "w";
-        }
-      }
-      const extra = 2 + Math.floor(Math.random() * 4);
-      for (let j = 0; j < extra; j++) {
-        const dx = Math.floor(Math.random() * 5) - 2;
-        const dy = Math.floor(Math.random() * 5) - 2;
-        const nx = cx + dx;
-        const ny = cy + dy;
-        if (
-          nx <= 0 ||
-          ny <= 0 ||
-          nx >= this.width - 1 ||
-          ny >= this.height - 1
-        )
-          continue;
-        if (grid[ny][nx] === ".") grid[ny][nx] = "w";
-      }
-    }
-  }
-
-  private scatterFishInWater(grid: TileType[][], count: number): void {
-    const waterCells: Array<[number, number]> = [];
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.width; x++) {
-        if (grid[y][x] === "w") waterCells.push([x, y]);
-      }
-    }
-    const target = Math.min(count, waterCells.length);
-    for (let i = 0; i < target; i++) {
-      const idx = Math.floor(Math.random() * waterCells.length);
-      const [x, y] = waterCells[idx];
-      grid[y][x] = "F";
-      waterCells.splice(idx, 1);
-    }
-  }
 
   private registerInitialItems(): void {
     const now = Date.now();
@@ -325,13 +260,9 @@ export class World {
       t === "." ||
       t === "M" ||
       t === "+" ||
-      t === "L" ||
-      t === "F" ||
-      t === "G" ||
       t === "E" ||
       t === "H" ||
-      t === "T" ||
-      t === "w"
+      t === "T"
     );
   }
 
@@ -425,7 +356,7 @@ export class World {
     for (let y = 1; y < this.height - 1; y++) {
       for (let x = 1; x < this.width - 1; x++) {
         const t = this.tiles[y][x];
-        if (t !== "." && t !== "%" && t !== "M" && t !== "G" && t !== "+") {
+        if (t !== "." && t !== "%" && t !== "M" && t !== "+") {
           if ((x + y) % 3 === 0) this.tiles[y][x] = ".";
         }
       }
