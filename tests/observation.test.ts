@@ -30,7 +30,7 @@ test("observation includes heart H tile", () => {
   assert.deepEqual(heart!.pos, { x: 6, y: 5 });
 });
 
-test("observation includes energy E + cure +", () => {
+test("observation includes energy E, excludes cure + (safe zone)", () => {
   const w = new World(20, 15, "bugs");
   for (let y = 0; y < 15; y++) for (let x = 0; x < 20; x++) w.tiles[y][x] = ".";
   w.tiles[5][6] = "E";
@@ -56,7 +56,7 @@ test("observation includes energy E + cure +", () => {
   const energy = obs.nearby_entities.resources.find((r) => r.kind === "energy");
   const cure = obs.nearby_entities.resources.find((r) => r.kind === "cure");
   assert.ok(energy, "energy detected");
-  assert.ok(cure, "cure detected");
+  assert.equal(cure, undefined, "cure + tile (safe zone) excluded from observation");
 });
 
 test("observation excludes resources beyond vision radius", () => {

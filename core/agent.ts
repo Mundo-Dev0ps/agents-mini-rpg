@@ -226,13 +226,12 @@ export class Agent extends Entity {
         this.pendingDecision = null;
         return;
       }
-      if (ctx.mcpConnected) {
-        if (!ctx.mcpFresh) {
-          this.fsm.force("sleep");
-          this.reasoning = `💤 MCP idle — no recent telemetry from PID ${proc.pid}`;
-          this.path = [];
-          return;
-        }
+      const pidState = ctx.monitor.pidState(proc.pid);
+      if (pidState === "ACTIVE") {
+        // CPU evidence — proceed regardless of MCP staleness
+      } else if (pidState === "STANDBY") {
+        // STANDBY = CPU activity 1-15%, treat as alive
+      } else if (ctx.mcpConnected && ctx.mcpFresh) {
         if (MCP_IDLE_RE.test(ctx.mcpLastAction)) {
           this.fsm.force("sleep");
           this.reasoning = `💤 MCP says "${ctx.mcpLastAction}" — sitting`;
@@ -240,16 +239,10 @@ export class Agent extends Entity {
           return;
         }
       } else {
-        if (!ctx.monitor.isPidActive(proc.pid)) {
-          const stateLabel = ctx.monitor.pidState(proc.pid);
-          this.fsm.force(stateLabel === "STANDBY" ? "thinking" : "sleep");
-          this.reasoning =
-            stateLabel === "STANDBY"
-              ? `Standby... PID ${proc.pid} cpu ${proc.cpu.toFixed(1)}% (debouncing)`
-              : `💤 idle... PID ${proc.pid} cpu ${proc.cpu.toFixed(1)}%`;
-          this.path = [];
-          return;
-        }
+        this.fsm.force("sleep");
+        this.reasoning = `💤 idle... PID ${proc.pid} cpu ${proc.cpu.toFixed(1)}%`;
+        this.path = [];
+        return;
       }
     } else {
       if (ctx.monitor.processes.length === 0) {
@@ -396,6 +389,9 @@ export class Agent extends Entity {
       this.fsm.force("moving");
       this.recomputePath(world, target);
       this.stepPath(world, occupied, ctx.tick);
+      if (this.path.length === 0) {
+        this.currentDecision = null;
+      }
     }
   }
 
@@ -415,7 +411,6 @@ export class Agent extends Entity {
       return (
         t === "%" ||
         t === "M" ||
-        t === "+" ||
         t === "E" ||
         t === "$" ||
         t === "H"

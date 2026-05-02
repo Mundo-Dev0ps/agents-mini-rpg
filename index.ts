@@ -18,10 +18,10 @@ const MIN_TICK_MS = 100;
 const MAX_TICK_MS = 1000;
 const STEP_MS = 50;
 
-const MIN_COLS = 100;
-const MIN_ROWS = 28;
+const MIN_COLS = 113;
+const MIN_ROWS = 35;
 const REC_COLS = 140;
-const REC_ROWS = 36;
+const REC_ROWS = 42;
 
 const ANSI_CLEAR = "\x1b[2J";
 const ANSI_HOME = "\x1b[H";
@@ -67,41 +67,65 @@ function drawSizeGate(): void {
   const okW = w >= MIN_COLS;
   const okH = h >= MIN_ROWS;
   const recOk = w >= REC_COLS && h >= REC_ROWS;
-  const wTxt = okW ? chalk.green(String(w)) : chalk.red.bold(String(w));
-  const hTxt = okH ? chalk.green(String(h)) : chalk.red.bold(String(h));
+
+  const wTxt = okW ? chalk.greenBright.bold(String(w)) : chalk.redBright.bold(String(w));
+  const hTxt = okH ? chalk.greenBright.bold(String(h)) : chalk.redBright.bold(String(h));
   const recTxt = recOk
-    ? chalk.green(`${REC_COLS}×${REC_ROWS} ✓`)
+    ? chalk.greenBright(`${REC_COLS}×${REC_ROWS} ✓`)
     : chalk.gray(`${REC_COLS}×${REC_ROWS}`);
-  const lines = [
+
+  const content = [
+    chalk.bgRed.white.bold(" ⚠  TERMINAL TOO SMALL — RESIZE TO CONTINUE "),
     "",
-    "  " + chalk.bgRed.white.bold("  ⚠ TERMINAL TOO SMALL — game blocked  "),
+    `  Current:      ${wTxt} cols × ${hTxt} rows`,
+    `  Required:     ${chalk.cyanBright(`${MIN_COLS} × ${MIN_ROWS}`)}`,
+    `  Recommended:  ${recTxt}`,
     "",
-    "  " + chalk.bold("Current size:    ") + `${wTxt} cols × ${hTxt} rows`,
-    "  " + chalk.bold("Minimum:         ") + chalk.cyan(`${MIN_COLS}×${MIN_ROWS}`) + chalk.gray("  (required to start)"),
-    "  " + chalk.bold("Recommended:     ") + recTxt,
-    "",
-    "  " + chalk.gray("Resize terminal — UI updates live."),
-    "  " + chalk.gray("Ctrl-C to quit."),
-    "",
+    chalk.gray("  Drag terminal edge to resize — updates live."),
+    chalk.gray("  Game is paused. Ctrl-C to quit."),
   ];
-  process.stdout.write(ANSI_CLEAR + ANSI_HOME + ANSI_HIDE + lines.join("\n"));
+
+  const stripLen = (s: string) => s.replace(/\x1b\[[0-9;]*m/g, "").length;
+  const maxLen = Math.max(...content.map(stripLen));
+  const blank = " ".repeat(Math.max(0, w));
+  const out: string[] = [ANSI_CLEAR + ANSI_HOME + ANSI_HIDE];
+
+  const vPad = Math.max(0, Math.floor((h - content.length) / 2));
+  for (let i = 0; i < vPad; i++) out.push(blank);
+  for (const line of content) {
+    const hPad = Math.max(0, Math.floor((w - maxLen) / 2));
+    out.push(" ".repeat(hPad) + line);
+  }
+  for (let i = vPad + content.length; i < h; i++) out.push(blank);
+
+  try { process.stdout.write(out.join("\n")); } catch { /* terminal too small to write */ }
 }
 
 function waitForTerminalSize(): Promise<void> {
   return new Promise((resolve) => {
-    const w = process.stdout.columns || 80;
-    const h = process.stdout.rows || 24;
-    if (w >= MIN_COLS && h >= MIN_ROWS) {
-      resolve();
-      return;
-    }
+    const ok = () => (process.stdout.columns || 80) >= MIN_COLS && (process.stdout.rows || 24) >= MIN_ROWS;
+    if (ok()) { resolve(); return; }
+
     drawSizeGate();
-    const onResize = () => {
-      const w2 = process.stdout.columns || 80;
-      const h2 = process.stdout.rows || 24;
-      if (w2 >= MIN_COLS && h2 >= MIN_ROWS) {
+
+    // setInterval keeps event loop alive (SIGWINCH alone does not ref the loop in all Node versions)
+    // also refreshes the gate display live so current size updates as user drags
+    const poll = setInterval(() => {
+      if (ok()) {
+        clearInterval(poll);
         process.removeListener("SIGWINCH", onResize);
-        process.stdout.write(ANSI_CLEAR + ANSI_HOME + ANSI_SHOW + ANSI_RESET);
+        try { process.stdout.write(ANSI_CLEAR + ANSI_HOME + ANSI_SHOW + ANSI_RESET); } catch { /* ignore */ }
+        resolve();
+      } else {
+        drawSizeGate();
+      }
+    }, 250);
+
+    const onResize = () => {
+      if (ok()) {
+        clearInterval(poll);
+        process.removeListener("SIGWINCH", onResize);
+        try { process.stdout.write(ANSI_CLEAR + ANSI_HOME + ANSI_SHOW + ANSI_RESET); } catch { /* ignore */ }
         resolve();
       } else {
         drawSizeGate();
@@ -169,9 +193,10 @@ function drawBoxMenu(title: string, footer: string, items: MenuItem[], cursor: n
     const tone = toneColor(it.tone);
     const stripe = tone("▎");
     const arrow = selected ? tone("▶") : " ";
+    const numTag = chalk.dim(`[${i + 1}]`);
     const labelText = selected
-      ? chalk.bgWhite.black.bold(` ${arrow} ${stripe} ${it.label} `)
-      : ` ${arrow} ${stripe} ${it.label} `;
+      ? chalk.bgWhite.black.bold(` ${arrow} ${stripe} ${numTag} ${it.label} `)
+      : ` ${arrow} ${stripe} ${numTag} ${it.label} `;
     const padded = padVisible(labelText, inner);
     out.push(side + padded + side + "\n");
   });
@@ -211,7 +236,18 @@ function runBoxMenu(title: string, footer: string, items: MenuItem[], initialCur
     stdin.resume();
     stdin.setEncoding("utf8");
     let buf = "";
+    const onMenuResize = () => {
+      const w = process.stdout.columns || 80;
+      const h = process.stdout.rows || 24;
+      if (w < MIN_COLS || h < MIN_ROWS) {
+        drawSizeGate();
+      } else {
+        try { drawBoxMenu(title, footer, items, cursor); } catch { /* ignore */ }
+      }
+    };
+    process.on("SIGWINCH", onMenuResize);
     const cleanup = () => {
+      process.removeListener("SIGWINCH", onMenuResize);
       stdin.off("data", onData);
       stdin.setRawMode(false);
       stdin.pause();
@@ -222,6 +258,7 @@ function runBoxMenu(title: string, footer: string, items: MenuItem[], initialCur
       while (buf.length > 0) {
         let consumed = 0;
         let action: "up" | "down" | "enter" | "back" | "quit" | null = null;
+        let directIndex = -1;
         if (buf.startsWith("\x1b[A")) { action = "up"; consumed = 3; }
         else if (buf.startsWith("\x1b[B")) { action = "down"; consumed = 3; }
         else if (buf.startsWith("\x1b") && buf.length === 1) { return; }
@@ -233,9 +270,17 @@ function runBoxMenu(title: string, footer: string, items: MenuItem[], initialCur
         else if (buf[0].toLowerCase() === "b") { action = "back"; consumed = 1; }
         else if (buf[0] === "k") { action = "up"; consumed = 1; }
         else if (buf[0] === "j") { action = "down"; consumed = 1; }
+        else if (buf[0] >= "1" && buf[0] <= "9") {
+          directIndex = parseInt(buf[0], 10) - 1;
+          consumed = 1;
+        }
         else { consumed = 1; }
         buf = buf.slice(consumed);
-        if (action === "up") {
+        if (directIndex >= 0 && directIndex < items.length) {
+          cleanup();
+          resolve(items[directIndex].value);
+          return;
+        } else if (action === "up") {
           cursor = (cursor - 1 + items.length) % items.length;
           drawBoxMenu(title, footer, items, cursor);
         } else if (action === "down") {
@@ -290,7 +335,7 @@ async function promptMode(): Promise<GameMode> {
   while (true) {
     const v = await runBoxMenu(
       "🎮  GAME MODE",
-      "↑/↓ move  ·  ↵ select  ·  q quit",
+      "↑/↓ move  ·  ↵ select  ·  1-2 quick  ·  q quit",
       items
     );
     if (v === "adventure" || v === "bugs") return v;
@@ -340,7 +385,7 @@ async function promptMenu(theme: Theme): Promise<MenuChoice> {
   });
   const v = await runBoxMenu(
     `${theme.label.toUpperCase()}  —  CHOOSE AVATAR`,
-    "↑/↓ move  ·  ↵ select  ·  b back  ·  q quit",
+    "↑/↓ move  ·  ↵ select  ·  1-6 quick  ·  b back  ·  q quit",
     items
   );
   if (v === null || v === "back") return { observer: false, cls: null, back: true };
@@ -363,11 +408,22 @@ function printSelector(): void {
 }
 
 async function main(): Promise<void> {
+  // Suppress EPIPE — stdout write fails silently when terminal shrinks
+  process.stdout.on("error", (err: NodeJS.ErrnoException) => {
+    if (err.code !== "EPIPE") throw err;
+  });
+  process.stderr.on("error", (err: NodeJS.ErrnoException) => {
+    if (err.code !== "EPIPE") throw err;
+  });
+  // SIGHUP — sent by some terminals on aggressive resize or detach; ignore to stay alive
+  process.on("SIGHUP", () => {});
+
   const args = parseArgs();
   if (args["help"] === "classes" || args["list-classes"] !== undefined) {
     printSelector();
     process.exit(0);
   }
+  await waitForTerminalSize();
 
   const observerFlag =
     args["observer"] !== undefined || process.env.OBSERVER_MODE === "1";
@@ -420,15 +476,20 @@ async function main(): Promise<void> {
   const renderer = new Renderer();
   renderer.init();
 
+  let resizePaused = false;
   process.on("SIGWINCH", () => {
     const w = process.stdout.columns || 80;
     const h = process.stdout.rows || 24;
     if (w < MIN_COLS || h < MIN_ROWS) {
-      process.stdout.write(ANSI_CLEAR + ANSI_HOME);
+      resizePaused = true;
+      drawSizeGate();
       return;
     }
-    process.stdout.write(ANSI_CLEAR + ANSI_HOME);
-    renderer.flash(`📐 resize ${w}x${h}`, 6, game.tick);
+    if (resizePaused) {
+      resizePaused = false;
+      try { renderer.render(game, tickMs); } catch { /* ignore */ }
+    }
+    renderer.flash(`📐 ${w}×${h}`, 6, game.tick);
   });
 
   let running = true;
@@ -490,7 +551,7 @@ async function main(): Promise<void> {
       return;
     }
     if (key === "5") {
-      renderer.setEventFilter("alerts");
+      renderer.setEventFilter("system");
       return;
     }
     if (key === "n") {
@@ -584,6 +645,10 @@ async function main(): Promise<void> {
 
   await new Promise<void>((resolve) => {
     const loop = () => {
+      if (resizePaused) {
+        setTimeout(loop, 200);
+        return;
+      }
       if (renderer.pendingMenuRequest) {
         exitReason.reason = renderer.pendingMenuRequest;
         renderer.pendingMenuRequest = null;
@@ -596,8 +661,10 @@ async function main(): Promise<void> {
         resolve();
         return;
       }
-      game.step();
-      renderer.render(game, tickMs);
+      try {
+        game.step();
+        renderer.render(game, tickMs);
+      } catch { /* swallow render errors — e.g. terminal shrunk mid-frame */ }
       setTimeout(loop, tickMs);
     };
     renderer.render(game, tickMs);

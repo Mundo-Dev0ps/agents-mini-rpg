@@ -35,7 +35,7 @@ Five classes in `core/avatars.ts`: `mage` (🧙), `tech` (🤖), `wolf` (🐺), 
 
 ## Engine state gating
 
-Game tick frozen when engine paused, no Claude process connected, or connected process `IDLE`/`STANDBY` + MCP bridge stale (>5 seconds). When frozen, renderer dim map + show `SYSTEM SUSPENDED` overlay. Intentional — in-game world mirror activity of real Claude process.
+Game tick frozen when engine paused, no Claude process connected, or connected process `IDLE` + MCP bridge stale (>5 seconds). `STANDBY` (CPU 1-15%) treated as alive — covers API waits + file I/O. When frozen, renderer dim map + show `SYSTEM SUSPENDED` overlay. Intentional — in-game world mirror activity of real Claude process.
 
 ## Conventions
 

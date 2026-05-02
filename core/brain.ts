@@ -147,8 +147,23 @@ export class MockBrain implements Brain {
       return this.pack("COLLECT", res.pos, thought, inputBlob);
     }
 
-    const thought = `${op}, map quiet. Holding position.`;
-    return this.pack("WAIT", undefined, thought, inputBlob);
+    const dirs = [
+      { dx: 0, dy: -1 },
+      { dx: 0, dy: 1 },
+      { dx: -1, dy: 0 },
+      { dx: 1, dy: 0 },
+      { dx: -2, dy: 0 },
+      { dx: 2, dy: 0 },
+      { dx: 0, dy: -2 },
+      { dx: 0, dy: 2 },
+    ];
+    const pick = dirs[Math.floor(Math.random() * dirs.length)];
+    const wanderTarget: Position = {
+      x: obs.current_pos.x + pick.dx,
+      y: obs.current_pos.y + pick.dy,
+    };
+    const thought = `${op}, map quiet. Wandering to (${wanderTarget.x},${wanderTarget.y}).`;
+    return this.pack("MOVE", wanderTarget, thought, inputBlob);
   }
 
   private pack(
@@ -299,7 +314,6 @@ export function buildObservation(
       else if (t === "M") obsResources.push({ kind: "meat", pos: { x, y }, distance: d });
       else if (t === "E") obsResources.push({ kind: "energy", pos: { x, y }, distance: d });
       else if (t === "H") obsResources.push({ kind: "heart", pos: { x, y }, distance: d });
-      else if (t === "+") obsResources.push({ kind: "cure", pos: { x, y }, distance: d });
     }
   }
   obsResources.sort((a, b) => a.distance - b.distance);
