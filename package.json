@@ -5,13 +5,13 @@
   "main": "dist/index.js",
   "license": "MIT",
   "author": "agents-mini-rpg contributors",
-  "homepage": "https://github.com/Mundo-Dev0ps/agent-mini-rpg#readme",
+  "homepage": "https://github.com/Mundo-Dev0ps/agents-mini-rpg#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Mundo-Dev0ps/agent-mini-rpg.git"
+    "url": "git+https://github.com/Mundo-Dev0ps/agents-mini-rpg.git"
   },
   "bugs": {
-    "url": "https://github.com/Mundo-Dev0ps/agent-mini-rpg/issues"
+    "url": "https://github.com/Mundo-Dev0ps/agents-mini-rpg/issues"
   },
   "publishConfig": {
     "access": "public"

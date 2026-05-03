@@ -7,12 +7,12 @@
 ### 🤖 Terminal multi-agent RPG · powered by **Claude Code CLI** 🌲
 
 [![npm version](https://img.shields.io/npm/v/agents-mini-rpg?style=flat-square&color=CB3837&logo=npm)](https://www.npmjs.com/package/agents-mini-rpg)
-[![CI](https://img.shields.io/github/actions/workflow/status/Mundo-Dev0ps/agent-mini-rpg/ci.yml?style=flat-square&logo=githubactions&label=CI)](https://github.com/Mundo-Dev0ps/agent-mini-rpg/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/Mundo-Dev0ps/agents-mini-rpg/ci.yml?style=flat-square&logo=githubactions&label=CI)](https://github.com/Mundo-Dev0ps/agents-mini-rpg/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](./LICENSE)
 [![Node ≥ 20](https://img.shields.io/badge/node-%E2%89%A520-brightgreen?style=flat-square&logo=nodedotjs)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS-lightgrey?style=flat-square&logo=linux)](./docs/COMPATIBILITY.md)
-[![Tests](https://img.shields.io/badge/tests-43%20passing-success?style=flat-square)](https://github.com/Mundo-Dev0ps/agent-mini-rpg/actions)
+[![Tests](https://img.shields.io/badge/tests-43%20passing-success?style=flat-square)](https://github.com/Mundo-Dev0ps/agents-mini-rpg/actions)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-ff69b4?style=flat-square)](./docs/RELEASE.md)
 
 <br/>
@@ -145,8 +145,8 @@ agent-rpg
 ### Run from source
 
 ```bash
-git clone https://github.com/Mundo-Dev0ps/agent-mini-rpg.git
-cd agent-mini-rpg
+git clone https://github.com/Mundo-Dev0ps/agents-mini-rpg.git
+cd agents-mini-rpg
 npm install
 npm run dev        # ts-node, no build step
 ```
@@ -200,6 +200,6 @@ On first launch: mode menu → avatar menu → game starts. Navigate with `↑/�
 
 ⭐ Star this repo if it made your AI workflow more fun!
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Mundo-Dev0ps/agent-mini-rpg&type=Date)](https://star-history.com/#Mundo-Dev0ps/agent-mini-rpg&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=Mundo-Dev0ps/agents-mini-rpg&type=Date)](https://star-history.com/#Mundo-Dev0ps/agents-mini-rpg&Date)
 
 </div>
