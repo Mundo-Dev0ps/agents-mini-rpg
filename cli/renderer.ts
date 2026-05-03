@@ -10,8 +10,9 @@ import {
   Weapon,
 } from "../core/entity";
 import { DIR_ARROW, DIR_EMOJI, Direction } from "../core/direction";
-import { CLASS_SPECS, AuraColor, CharacterClass } from "../core/avatars";
+import { CLASS_SPECS, AuraColor, CharacterClass, canBypass } from "../core/avatars";
 import { isAudioEnabled as isAudioEnabledShim } from "../core/audio";
+import { isNotificationsEnabled, setNotificationsEnabled } from "../core/notifications";
 import { Theme } from "../core/themes";
 import { AgentRole, AgentState, Quest } from "../core/types";
 
@@ -214,7 +215,7 @@ function atqBar(atq: number, baseline: number = 20, len: number = 6): string {
   return `[${chalk.redBright(bar(atq, baseline, len))}]`;
 }
 
-type FloatColorName = "red" | "green" | "cyan" | "yellow" | "magenta" | "white" | "orange";
+type FloatColorName = "red" | "green" | "cyan" | "yellow" | "magenta" | "white" | "orange" | "gray";
 
 function floatStyler(c: FloatColorName, colorBlind: boolean): (s: string) => string {
   if (colorBlind) return chalk.bold.whiteBright;
@@ -231,6 +232,8 @@ function floatStyler(c: FloatColorName, colorBlind: boolean): (s: string) => str
       return chalk.bold.whiteBright;
     case "orange":
       return chalk.bold.yellow;
+    case "gray":
+      return chalk.dim.gray;
     case "yellow":
     default:
       return chalk.bold.yellowBright;
@@ -255,23 +258,19 @@ export class Renderer {
   colorBlind: boolean = false;
   settingsOpen: boolean = false;
   pendingMenuRequest: "mode" | "avatar" | null = null;
-  eventFilter: "all" | "agents" | "tools" | "combat" | "alerts" = "all";
+  eventFilter: "all" | "agents" | "tools" | "combat" | "system" = "all";
   private settingsCursor: number = 0;
 
   cycleEventFilter(): void {
-    const order: Array<"all" | "agents" | "tools" | "combat" | "alerts"> = [
-      "all",
-      "agents",
-      "tools",
-      "combat",
-      "alerts",
+    const order: Array<"all" | "agents" | "tools" | "combat" | "system"> = [
+      "all", "agents", "tools", "combat", "system",
     ];
     const idx = order.indexOf(this.eventFilter);
     this.eventFilter = order[(idx + 1) % order.length];
   }
 
   setEventFilter(
-    f: "all" | "agents" | "tools" | "combat" | "alerts"
+    f: "all" | "agents" | "tools" | "combat" | "system"
   ): void {
     this.eventFilter = f;
   }
@@ -286,20 +285,22 @@ export class Renderer {
   }
 
   settingsCursorMove(dir: 1 | -1): void {
-    const total = 7;
+    const total = 8;
     this.settingsCursor = (this.settingsCursor + dir + total) % total;
   }
 
   settingsItems(game: Game): string[] {
     const aud = isAudioEnabledShim() ? "ON" : "OFF";
+    const notif = isNotificationsEnabled() ? "ON" : "OFF";
     const cb = this.colorBlind ? "ON" : "OFF";
     const obs = game.observerMode ? "ON" : "OFF";
     const night = game.nightMode ? "🌙 NIGHT" : "☀ DAY";
     return [
-      `Audio:        ${aud}`,
-      `Color blind:  ${cb}`,
-      `Observer:     ${obs} (read-only)`,
-      `Cycle:        ${night}`,
+      `Audio:         ${aud}`,
+      `Notifications: ${notif}`,
+      `Color blind:   ${cb}`,
+      `Observer:      ${obs} (read-only)`,
+      `Cycle:         ${night}`,
       `🔁 Restart game (R1)`,
       `🌐 Change mode (Adventure/Bugs)`,
       `🧝 Change avatar`,
@@ -308,17 +309,18 @@ export class Renderer {
 
   settingsActivate(game: Game, audioToggle: () => void, observerToggle: () => void): void {
     if (this.settingsCursor === 0) audioToggle();
-    else if (this.settingsCursor === 1) this.toggleColorBlind();
-    else if (this.settingsCursor === 2) observerToggle();
-    else if (this.settingsCursor === 3) {
+    else if (this.settingsCursor === 1) setNotificationsEnabled(!isNotificationsEnabled());
+    else if (this.settingsCursor === 2) this.toggleColorBlind();
+    else if (this.settingsCursor === 3) observerToggle();
+    else if (this.settingsCursor === 4) {
       game.nightMode = !game.nightMode;
-    } else if (this.settingsCursor === 4) {
+    } else if (this.settingsCursor === 5) {
       game.restart();
       this.settingsOpen = false;
-    } else if (this.settingsCursor === 5) {
+    } else if (this.settingsCursor === 6) {
       this.pendingMenuRequest = "mode";
       this.settingsOpen = false;
-    } else if (this.settingsCursor === 6) {
+    } else if (this.settingsCursor === 7) {
       this.pendingMenuRequest = "avatar";
       this.settingsOpen = false;
     }
@@ -616,7 +618,6 @@ export class Renderer {
     for (const sub of game.subAgents) {
       if (sub.state === "done") continue;
       if (!game.world.inBounds(sub.pos.x, sub.pos.y)) continue;
-      if (!game.isRevealed(sub.pos.x, sub.pos.y)) continue;
       if (game.entitiesAt(sub.pos.x, sub.pos.y).length > 0) continue;
       const r = VIEW_MAP_TOP + sub.pos.y + 1;
       const c = 2 + sub.pos.x * TILE_CELL_WIDTH;
@@ -714,12 +715,12 @@ export class Renderer {
   }
 
   private renderEventTabs(active: string): string {
-    const tabs: Array<[string, string, string]> = [
-      ["all", "[1]ALL", "all"],
-      ["agents", "[2]🤖game", "agents"],
-      ["tools", "[3]✏️tools", "tools"],
-      ["combat", "[4]⚔", "combat"],
-      ["alerts", "[5]🚨", "alerts"],
+    const tabs: Array<[string, string]> = [
+      ["all",    "[1]ALL"      ],
+      ["agents", "[2]🤖agents" ],
+      ["tools",  "[3]✏️tools"  ],
+      ["combat", "[4]⚔combat" ],
+      ["system", "[5]📋system" ],
     ];
     return tabs
       .map(([key, lbl]) =>
@@ -739,20 +740,14 @@ export class Renderer {
       );
     if (filter === "tools") return events.filter((e) => e.source === "mcp");
     if (filter === "combat") return events.filter((e) => e.severity === "combat");
-    if (filter === "alerts") return events.filter((e) => e.severity === "error" || e.severity === "warn");
+    if (filter === "system") return events.filter(
+      (e) => e.severity === "system" || e.severity === "info" || e.severity === "error" || e.severity === "warn"
+    );
     return events;
   }
 
   private pidColorChalk(pid: number | null): (s: string) => string {
-    if (pid === null) return chalk.gray;
-    const colors = [
-      chalk.cyanBright,
-      chalk.magentaBright,
-      chalk.yellowBright,
-      chalk.greenBright,
-      chalk.blueBright,
-    ];
-    return colors[pid % colors.length];
+    return pidColor(pid);
   }
 
   private renderEventLine(
@@ -1076,9 +1071,6 @@ export class Renderer {
     y: number,
     selected: Agent | undefined
   ): string {
-    if (!game.isRevealed(x, y)) {
-      return chalk.bgBlack.gray("░░");
-    }
     const ents = game.entitiesAt(x, y);
 
     let player: Player | undefined;
@@ -1098,8 +1090,13 @@ export class Renderer {
       else if (e instanceof Weapon) weapon = e;
     }
 
+    if (!game.isRevealed(x, y) && !agent && !fairy) {
+      return chalk.bgBlack.gray("░░");
+    }
+
     if (player) {
       if (game.observerMode) return this.groundTile();
+      if (player.hp <= 0) return chalk.bgGray.dim("💀") + RESET;
       const icon = iconCell(player.characterClass, game.theme);
       const justMoved = game.tick - player.lastMoveTick <= 1;
       let wrapped: string;
@@ -1121,16 +1118,28 @@ export class Renderer {
       const busy = proc ? proc.cpu > 1.0 : false;
       const aura = pidColor(agent.linkedPid);
       const justMoved = game.tick - agent.lastMoveTick <= 1;
+      const hasWorkingSubs = game.subAgents.some(
+        (s) => s.parentAgentId === agent.id && s.state === "working"
+      );
+      const subPulseOn = hasWorkingSubs && Math.floor(game.tick / 4) % 2 === 0;
+      const flying =
+        canBypass(agent.characterClass) &&
+        !game.world.isWalkable(agent.pos.x, agent.pos.y);
+      const flyPulseOn = flying && Math.floor(game.tick / 2) % 2 === 0;
       let icon: string;
-      if (game.engineOffline) icon = "⚠️ ";
+      if (agent.hp <= 0 && agent.deadSinceTick >= 0) icon = "💀";
+      else if (game.engineOffline) icon = "⚠️ ";
       else if (zombie) icon = "💤";
       else icon = iconCell(agent.characterClass, game.theme);
       let colored: string;
-      if (game.engineOffline) colored = chalk.bgRed.white(icon);
+      if (agent.hp <= 0 && agent.deadSinceTick >= 0) colored = chalk.bgGray.dim(icon);
+      else if (game.engineOffline) colored = chalk.bgRed.white(icon);
       else if (zombie) colored = chalk.bgRed.dim(icon);
       else if (game.tick < agent.damageFlashUntil) colored = chalk.bgRed.bold(icon);
       else if (game.tick < agent.pickupFlashUntil) colored = chalk.bgWhite.black.bold(icon);
       else if (justMoved) colored = chalk.bgCyan.bold(icon);
+      else if (subPulseOn) colored = chalk.bgCyanBright.bold(icon);
+      else if (flying) colored = (flyPulseOn ? chalk.bgBlueBright : chalk.bgBlue).bold(icon);
       else if (sleeping) colored = chalk.dim(icon);
       else if (busy) colored = chalk.bgMagenta(aura(icon));
       else colored = aura(icon);
@@ -1487,8 +1496,12 @@ export class Renderer {
         const cls = classLabel(a.characterClass, game.theme);
         const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "  ";
         const pidStr = a.linkedPid !== null ? `pid${a.linkedPid}` : "—";
+        const subCount = game.subAgents.filter(
+          (s) => s.parentAgentId === a.id && s.state !== "done"
+        ).length;
+        const subBadge = subCount > 0 ? chalk.cyanBright(` 🧬${subCount}`) : "";
         lines.push(
-          `   ${medal} ${icon} ${chalk.gray(cls.padEnd(7))} ${chalk.gray(pidStr.padEnd(8))} ${chalk.redBright(`${a.kills}k`)}`
+          `   ${medal} ${icon} ${chalk.gray(cls.padEnd(7))} ${chalk.gray(pidStr.padEnd(8))} ${chalk.redBright(`${a.kills}k`)}${subBadge}`
         );
       }
       lines.push(this.sectionFooter(chalk.magentaBright));
@@ -1498,7 +1511,13 @@ export class Renderer {
       const a = game.agents[sel];
       lines.push("");
       lines.push(chalk.bold.white(`Inspect ${trunc(a.name, 20)}`));
-      lines.push(` role ${a.role}`);
+      lines.push(` role ${a.role}  state ${chalk.cyanBright(a.state())}`);
+      const pidStr = a.linkedPid !== null ? String(a.linkedPid) : "—";
+      const pidState = a.linkedPid !== null ? game.monitor.pidState(a.linkedPid) : "n/a";
+      lines.push(` pid ${chalk.gray(pidStr)}  pidState ${chalk.yellow(pidState)}`);
+      const mcpStr = game.mcpConnected ? (game.mcpFresh(5000) ? "fresh" : "stale") : "off";
+      lines.push(` mcp ${chalk.gray(mcpStr)}  lastAct ${chalk.gray(trunc(game.lastMcpAction || "-", 24))}`);
+      lines.push(` ${chalk.gray("why:")} ${chalk.white(trunc(a.reasoning || "-", REASON_MAX))}`);
       if (a.log.length > 0) {
         lines.push(chalk.gray(" recent:"));
         for (const l of a.log) {

@@ -27,6 +27,7 @@ import {
 import { Bridge, BridgePayload } from "./bridge";
 import { ProcessMonitor, ProcessState } from "./process_monitor";
 import { playNeedsInput, setAudioTheme } from "./audio";
+import { sendNeedsInputNotification } from "./notifications";
 import {
   CharacterClass,
   CLASS_SPECS,
@@ -67,7 +68,8 @@ export type FloatColor =
   | "yellow"
   | "magenta"
   | "white"
-  | "orange";
+  | "orange"
+  | "gray";
 
 export interface GameOptions {
   width?: number;
@@ -250,7 +252,6 @@ export class Game {
     this.deescalateUntil = 0;
     this.weather = "clear";
     this.escalation = 0;
-    this.fogEnabled = true;
     this.revealed = new Set();
     this.fairyCooldownUntil = 0;
     this.fairyDespawnAt = 0;
@@ -272,6 +273,7 @@ export class Game {
     this.mode = opts.mode ?? "bugs";
     this.theme = themeFor(this.mode);
     setAudioTheme(this.mode);
+    this.fogEnabled = this.mode === "adventure";
     this.crashed = false;
     this.crashedAt = 0;
     this.fairyOffline = false;
@@ -823,6 +825,8 @@ export class Game {
     this.agentDeathTicks = [];
     this.deescalateUntil = 0;
     this.killTicks = [];
+    this.fogEnabled = this.mode === "adventure";
+    this.revealed = new Set();
     this.bootstrap();
     this.maybeAutoHandshake();
     this.pushEvent(`SYSTEM REBOOT — fresh deploy for ${this.identity.displayName}`);
@@ -1045,9 +1049,19 @@ export class Game {
     const m = msg.toLowerCase();
     if (m.includes("error") || m.includes("disconnect") || m.includes("crash") || m.includes("fail")) return "error";
     if (m.includes("idle") || m.includes("waiting input") || m.includes("warn") || m.includes("stale")) return "warn";
-    if (m.includes("conflict") || m.includes("⚔") || m.includes("hits") || m.includes("kill") || m.includes("boss") || m.includes("crit")) return "combat";
+    if (
+      m.includes("💀") || m.includes("⚔") || m.includes("hits") || m.includes("kill") ||
+      m.includes("boss") || m.includes("crit") || m.includes("damage") || m.includes("atk") ||
+      m.includes("mató") || m.includes("drop") || m.includes("revive") || m.includes("fell") ||
+      m.includes("down —") || m.includes("respawn") || m.includes("zombie")
+    ) return "combat";
     if (m.includes("claude-") || m.includes("📡") || m.includes("mcp")) return "agent";
-    if (m.includes("victory") || m.includes("clear") || m.includes("level") || m.includes("✓")) return "info";
+    if (
+      m.includes("round") || m.includes("victory") || m.includes("clear") ||
+      m.includes("level") || m.includes("✓") || m.includes("✅") || m.includes("system") ||
+      m.includes("reboot") || m.includes("spawn") || m.includes("wave") || m.includes("⏳") ||
+      m.includes("⏸") || m.includes("stable")
+    ) return "system";
     return "system";
   }
 
@@ -1312,6 +1326,23 @@ export class Game {
   }
 
   step(): void {
+    if (process.env.DEBUG_AGENTS === "1" && this.tick % 20 === 0) {
+      try {
+        const fs = require("fs") as typeof import("fs");
+        const lines: string[] = [`=== tick ${this.tick} mcpConnected=${this.mcpConnected} mcpFresh=${this.mcpFresh(5000)} lastAct="${this.lastMcpAction}" ===`];
+        for (const a of this.agents) {
+          const pid = a.linkedPid;
+          const ps = pid !== null ? this.monitor.pidState(pid) : "n/a";
+          const proc = pid !== null ? this.monitor.getByPid(pid) : null;
+          const cpu = proc ? proc.cpu.toFixed(1) : "-";
+          const tile = this.world.tiles[a.pos.y]?.[a.pos.x] ?? "?";
+          const cls = a.characterClass;
+          const bypass = ["scout", "flyer"].includes(cls) ? "bypass" : "no-bypass";
+          lines.push(`  ${a.name}(${cls}/${bypass}) pid=${pid ?? "—"} pidState=${ps} cpu=${cpu}% state=${a.state()} hp=${a.hp}/${a.maxHp} pos=(${a.pos.x},${a.pos.y}) tile='${tile}' why="${a.reasoning}"`);
+        }
+        fs.appendFileSync("/tmp/agent-rpg-debug.log", lines.join("\n") + "\n");
+      } catch { /* ignore */ }
+    }
     if (this.crashed) {
       if (Date.now() - this.crashedAt >= CRASH_RESET_MS) this.reset();
       return;
@@ -1727,6 +1758,11 @@ export class Game {
           a.hp = Math.max(1, Math.floor(a.maxHp / 2));
           a.deadSinceTick = -1;
           a.invulnUntilTick = this.tick + 30;
+          a.path = [];
+          a.currentDecision = null;
+          a.pendingDecision = null;
+          a.fsm.force("idle");
+          a.reasoning = "respawned, re-evaluating";
           this.pushEvent(
             `✨ ${a.name} respawned (death#${a.deathCount}, HP+${Math.round((buffMult - 1) * 100)}% — invuln 30t)`,
             a.linkedPid
@@ -1881,6 +1917,7 @@ export class Game {
     if (this.player.hp > 0) return;
     if (this.playerDeadAt === 0) {
       this.playerDeadAt = Date.now();
+      this.pushFloatingText("💀", this.player.pos, 2500, "white");
       this.pushEvent(`💀 [PLAYER] down — respawn 3s...`);
       return;
     }
@@ -2311,7 +2348,7 @@ export class Game {
       const cls = CLASS_SPECS[this.player.characterClass].label;
       const reason = inSafe ? " (safe zone slow drain)" : "";
       this.pushEvent(
-        `${this.helperIcon()}: ¡${this.identity.displayName}, el ${cls} is hungry!${reason}`
+        `${this.helperIcon()}: ¡${this.identity.displayName}, ${this.mode === "bugs" ? `el ${cls} battery crítica!` : `el ${cls} is hungry!`}${reason}`
       );
     }
   }
@@ -2371,6 +2408,7 @@ export class Game {
       if (prev !== cur) {
         if (prev === "ACTIVE" && cur === "IDLE") {
           playNeedsInput();
+          sendNeedsInputNotification(a.name, String(a.linkedPid));
           a.needsInput = true;
           a.needsInputSinceMs = Date.now();
           a.bashActive = false;
@@ -2390,6 +2428,7 @@ export class Game {
         } else if (cur === "IDLE" && prev !== undefined) {
           if (!a.needsInput) {
             playNeedsInput();
+            sendNeedsInputNotification(a.name, String(a.linkedPid));
             a.pushAction(this.tick, "🟡", "IDLE wait");
             this.pushEvent(
               `🟡 ${a.name} IDLE — waiting your input`,
@@ -2418,7 +2457,11 @@ export class Game {
   agentIsFrozen(agent: Agent): boolean {
     if (agent.linkedPid === null) return false;
     const s = this.monitor.pidState(agent.linkedPid);
-    return s === "IDLE" || s === "STANDBY" || s === "DISCONNECTED";
+    if (s === "DISCONNECTED") return true;
+    if (s === "ACTIVE") return false;
+    if (s === "STANDBY") return false;
+    // IDLE: freeze only when MCP bridge is also stale
+    return !this.mcpFresh(5000);
   }
 
   agentIsInvulnerable(agent: Agent): boolean {
@@ -2746,6 +2789,7 @@ export class Game {
           this.pushFloatingText("REVIVE", bug.pos, 1500, "red");
           continue;
         }
+        this.pushFloatingText("✕", bug.pos, 350, "gray");
         const dropTiles = this.dropItemsAroundBug(bug);
         this.bugsKilled += 1;
         this.killTicks.push(this.tick);
@@ -2829,6 +2873,7 @@ export class Game {
             );
           }
         }
+        this.pushFloatingText("💀", a.pos, 1800, "white");
         a.lastDamageTick = this.tick;
         a.deadSinceTick = this.tick;
         if (a.autoDeploys > 0) {

@@ -1,7 +1,8 @@
 # Screenshots
 
-Add PNG/GIF captures here:
-- adventure.png
-- bugs.png
+Current assets:
+- `main-image.png` — pixel-art hero banner (Robot + Elf, "Terminal RPG / Chronicles of Circuitry & Sorcery")
+- `agent-aventure.png` — Adventure mode in-game capture (forest theme)
+- `agents-vs-bugs.png` — Agents vs Bugs mode in-game capture (cyber theme)
 
-Record with: asciinema rec docs/screenshots/demo.cast
+Record terminal sessions with: `asciinema rec docs/screenshots/demo.cast`
