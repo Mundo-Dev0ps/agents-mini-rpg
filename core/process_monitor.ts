@@ -249,6 +249,7 @@ export class ProcessMonitor {
   private isSelf(cmd: string, name: string): boolean {
     const blob = `${cmd} ${name}`;
     return (
+      blob.includes("agents-mini-rpg") ||
       blob.includes("agent-mini-rpg") ||
       blob.includes("ps -axo") ||
       blob.includes("ps-list")

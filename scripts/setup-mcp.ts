@@ -169,7 +169,7 @@ function main(): void {
   const cfg = readConfig(target.path);
   if (!cfg.mcpServers) cfg.mcpServers = {};
 
-  cfg.mcpServers["agent-mini-rpg"] = {
+  cfg.mcpServers["agents-mini-rpg"] = {
     command: "node",
     args: [distEntry],
   };

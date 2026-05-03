@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Hook bridge for Claude Code → agent-mini-rpg sub-agent visualization
+# Hook bridge for Claude Code → agents-mini-rpg sub-agent visualization
 # Reads JSON from stdin (Claude Code hook payload) and writes update_subagent
 # event to ~/.agent_rpg_sync.json
 

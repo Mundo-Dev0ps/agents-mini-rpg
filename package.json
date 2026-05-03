@@ -1,10 +1,10 @@
 {
-  "name": "agent-mini-rpg",
+  "name": "agents-mini-rpg",
   "version": "0.1.1",
   "description": "Terminal-based multi-agent RPG that mirrors live Claude Code activity via an MCP file-bridge",
   "main": "dist/index.js",
   "license": "MIT",
-  "author": "agent-mini-rpg contributors",
+  "author": "agents-mini-rpg contributors",
   "homepage": "https://github.com/Mundo-Dev0ps/agent-mini-rpg#readme",
   "repository": {
     "type": "git",

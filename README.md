@@ -2,11 +2,11 @@
 
 <img src="docs/screenshots/main-image.png" alt="Terminal RPG — Chronicles of Circuitry & Sorcery" width="420" />
 
-# agent-mini-rpg
+# agents-mini-rpg
 
 ### 🤖 Terminal multi-agent RPG · powered by **Claude Code CLI** 🌲
 
-[![npm version](https://img.shields.io/npm/v/agent-mini-rpg?style=flat-square&color=CB3837&logo=npm)](https://www.npmjs.com/package/agent-mini-rpg)
+[![npm version](https://img.shields.io/npm/v/agents-mini-rpg?style=flat-square&color=CB3837&logo=npm)](https://www.npmjs.com/package/agents-mini-rpg)
 [![CI](https://img.shields.io/github/actions/workflow/status/Mundo-Dev0ps/agent-mini-rpg/ci.yml?style=flat-square&logo=githubactions&label=CI)](https://github.com/Mundo-Dev0ps/agent-mini-rpg/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](./LICENSE)
 [![Node ≥ 20](https://img.shields.io/badge/node-%E2%89%A520-brightgreen?style=flat-square&logo=nodedotjs)](https://nodejs.org)
@@ -135,10 +135,10 @@ Connects via **MCP file-bridge** — real tool calls (`Edit`, `Bash`, `Read`, `T
 
 ## 🚀 Quick Start
 
-### Install from npm *(once published)*
+### Install from npm
 
 ```bash
-npm install -g agent-mini-rpg
+npm install -g agents-mini-rpg
 agent-rpg
 ```
 
@@ -190,7 +190,7 @@ On first launch: mode menu → avatar menu → game starts. Navigate with `↑/�
 
 ## 📄 License
 
-[MIT](./LICENSE) — © agent-mini-rpg contributors
+[MIT](./LICENSE) — © agents-mini-rpg contributors
 
 ---
 

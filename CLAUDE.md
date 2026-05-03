@@ -1,4 +1,4 @@
-# agent-mini-rpg
+# agents-mini-rpg
 
 ## Overview
 

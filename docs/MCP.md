@@ -48,14 +48,14 @@ Wire `bin/notify-tool.sh` and `bin/notify-subagent.sh` in `~/.claude/settings.js
       {
         "matcher": "Edit|Write|Bash|Read|Grep|Glob|MultiEdit|Task",
         "hooks": [
-          { "type": "command", "command": "bash /path/to/agent-mini-rpg/bin/notify-tool.sh" }
+          { "type": "command", "command": "bash /path/to/agents-mini-rpg/bin/notify-tool.sh" }
         ]
       }
     ],
     "SubagentStop": [
       {
         "hooks": [
-          { "type": "command", "command": "bash /path/to/agent-mini-rpg/bin/notify-subagent.sh" }
+          { "type": "command", "command": "bash /path/to/agents-mini-rpg/bin/notify-subagent.sh" }
         ]
       }
     ]

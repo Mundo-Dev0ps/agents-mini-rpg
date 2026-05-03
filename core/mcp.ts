@@ -78,7 +78,7 @@ export async function runMcpServer(opts: McpServerOptions): Promise<void> {
   };
 
   const server = new Server(
-    { name: opts.name ?? "agent-mini-rpg", version: opts.version ?? "0.1.0" },
+    { name: opts.name ?? "agents-mini-rpg", version: opts.version ?? "0.1.1" },
     { capabilities: { tools: {} } }
   ) as {
     setRequestHandler: (schema: unknown, handler: Function) => void;

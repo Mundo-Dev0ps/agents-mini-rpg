@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generic PreToolUse hook for Claude Code → agent-mini-rpg event log.
+# Generic PreToolUse hook for Claude Code → agents-mini-rpg event log.
 # Reads JSON payload from stdin, writes update_agent_status payload to bridge file.
 
 set -euo pipefail

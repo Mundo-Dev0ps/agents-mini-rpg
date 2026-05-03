@@ -7,7 +7,7 @@ const syncFile = path.join(cwd, ".agent_sync.json");
 
 const config = {
   mcpServers: {
-    "agent-mini-rpg": {
+    "agents-mini-rpg": {
       command: "node",
       args: [distEntry],
       env: {
@@ -23,7 +23,7 @@ const claudeConfig = path.join(home, ".claude", "config.json");
 
 process.stdout.write(`
 ╔══════════════════════════════════════════════════════════════════╗
-║  agent-mini-rpg — MCP Server Auto-Configuration                  ║
+║  agents-mini-rpg — MCP Server Auto-Configuration                 ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 1. Build: npm run build
