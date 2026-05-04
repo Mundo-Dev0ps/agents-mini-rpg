@@ -20,6 +20,10 @@
 > **Every running Claude Code process becomes an in-game agent.**  
 > The world freezes when no Claude is active — it literally mirrors your AI workflow in real time.
 
+<br/>
+
+<img src="docs/agents-vs-bugs.gif" alt="agents-mini-rpg gameplay preview" width="720" />
+
 </div>
 
 ---
@@ -28,12 +32,32 @@
 
 <div align="center">
 
-| 🌲 Adventure Mode | 🤖 Agents vs Bugs Mode |
+| 🌲 Agents Aventure Mode | 🤖 Agents vs Bugs Mode |
 |:-:|:-:|
-| ![Adventure mode](docs/screenshots/agent-aventure.png) | ![Bugs mode](docs/screenshots/agents-vs-bugs.png) |
+| ![Agents Aventure mode](docs/screenshots/agent-aventure.png) | ![Bugs mode](docs/screenshots/agents-vs-bugs.png) |
 | Forest fantasy · quests · beasts | Cyber-tech · bugs scale per round |
 
 </div>
+
+---
+
+## 🎬 Demo
+
+<div align="center">
+
+**🌲 Agents Aventure Mode**
+
+https://github.com/Mundo-Dev0ps/agents-mini-rpg/raw/main/docs/agents-aventure.mp4
+
+<br/>
+
+**🤖 Agents vs Bugs Mode**
+
+https://github.com/Mundo-Dev0ps/agents-mini-rpg/raw/main/docs/agents-vs-bugs.mp4
+
+</div>
+
+> Tip: GitHub renderiza `.mp4` raw URLs como player inline. Si prefieres embed nativo (CDN `user-images.githubusercontent.com`), arrastra el archivo dentro de un issue/PR y reemplaza la URL.
 
 ---
 
@@ -56,7 +80,7 @@ Connects via **MCP file-bridge** — real tool calls (`Edit`, `Bash`, `Read`, `T
 
 | | |
 |--|--|
-| 🌲🤖 Two modes | *Adventure* (forest) and *Agents vs Bugs* (cyber-tech) |
+| 🌲🤖 Two modes | *Agents Aventure* (forest) and *Agents vs Bugs* (cyber-tech) |
 | 🧝🧙🧚🛡️ 4 avatars per mode | Distinct stats, abilities, aura colors |
 | ⚔️ Round-based progression | Enemies scale, boss waves, concurrent cap, deescalate |
 | 📡 MCP live event log | Every Claude tool call appears in-game |
@@ -68,7 +92,7 @@ Connects via **MCP file-bridge** — real tool calls (`Edit`, `Bash`, `Read`, `T
 
 ---
 
-## 🌲 Adventure Mode
+## 🌲 Agents Aventure Mode
 
 <div align="center">
 
@@ -116,7 +140,7 @@ Connects via **MCP file-bridge** — real tool calls (`Edit`, `Bash`, `Read`, `T
 
 <div align="center">
 
-| Tile | Adventure | Bugs | Effect |
+| Tile | Agents Aventure | Bugs | Effect |
 |:----:|-----------|------|--------|
 | ❤️  | Heart | Heart | +10 HP |
 | 🥩 / 🔋 | Meat | Battery | Refills hunger |
@@ -151,7 +175,7 @@ npm install
 npm run dev        # ts-node, no build step
 ```
 
-> **Terminal size:** minimum **113×35**, recommended **140×42**.  
+> **Terminal size:** minimum **107×34**, recommended **140×42**.  
 > The game shows a resize gate if your window is too small — just resize to dismiss.
 
 On first launch: mode menu → avatar menu → game starts. Navigate with `↑/↓ ↵`, back with `b`, quit with `q`. Press `1`–`2` in mode menu or `1`–`6` in avatar menu for instant selection.

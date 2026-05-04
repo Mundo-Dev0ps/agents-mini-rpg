@@ -302,7 +302,7 @@ export class Renderer {
       `Observer:      ${obs} (read-only)`,
       `Cycle:         ${night}`,
       `🔁 Restart game (R1)`,
-      `🌐 Change mode (Adventure/Bugs)`,
+      `🌐 Change mode (Agents Aventure/Bugs)`,
       `🧝 Change avatar`,
     ];
   }
@@ -884,7 +884,7 @@ export class Renderer {
       const left = Math.max(0, game.roundBetweenUntil - game.tick);
       phase = chalk.yellow(` ⏸ next in ${Math.ceil(left / 3.3)}s`);
     }
-    const title = game.theme.mode === "adventure" ? "🌲 Agent Adventure" : "🤖 Agents vs Bugs";
+    const title = game.theme.mode === "adventure" ? "🌲 Agents Aventure" : "🤖 Agents vs Bugs";
     return `${chalk.bold.white(title)}   ${status}   ${roundLbl}${phase}   bugs ${chalk.red(String(remaining))}   t${game.tick}`;
   }
 

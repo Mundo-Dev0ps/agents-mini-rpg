@@ -14,7 +14,7 @@ Press `m` (or `Esc`) to open the settings panel. Navigate with `↑/↓`, confir
 | 👁️ **Observer mode** | Hide player, camera follows top-CPU agent |
 | 🌙 **Night mode** | Dim map, change border style, add star overlay |
 | 🔁 **Restart game** | Reset round, world, and all agents |
-| 🌐 **Change mode** | Switch Adventure ↔ Agents vs Bugs |
+| 🌐 **Change mode** | Switch Agents Aventure ↔ Agents vs Bugs |
 | 🧝 **Change avatar** | Pick a different character class |
 
 ---
@@ -48,7 +48,7 @@ Options:
 
 ### Avatar class names by mode
 
-**Adventure mode:**
+**Agents Aventure mode:**
 
 | Flag value | Avatar |
 |-----------|--------|

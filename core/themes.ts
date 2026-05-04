@@ -64,7 +64,7 @@ const BUGS_NAMES = [
 export const THEMES: Record<GameMode, Theme> = {
   adventure: {
     mode: "adventure",
-    label: "Agent Adventure",
+    label: "Agents Aventure",
     blurb: "Fantasy Forest",
     enemyIcons: { l1: "🐺", l2: "🐻", l3: "🦍" },
     enemyVariants: {

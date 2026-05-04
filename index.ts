@@ -18,8 +18,8 @@ const MIN_TICK_MS = 100;
 const MAX_TICK_MS = 1000;
 const STEP_MS = 50;
 
-const MIN_COLS = 113;
-const MIN_ROWS = 35;
+const MIN_COLS = 107;
+const MIN_ROWS = 34;
 const REC_COLS = 140;
 const REC_ROWS = 42;
 
@@ -311,7 +311,7 @@ async function promptMode(): Promise<GameMode> {
   const items: MenuItem[] = [
     {
       label: `🌲  ${THEMES.adventure.label}`,
-      detail: `Adventure — ${THEMES.adventure.blurb}`,
+      detail: `Agents Aventure — ${THEMES.adventure.blurb}`,
       description: [
         "Forest fantasy world: NPCs, quests, hunts.",
         "Trees, rocks, water tiles. Bugs replaced by beasts.",
@@ -379,7 +379,7 @@ async function promptMenu(theme: Theme): Promise<MenuChoice> {
   items.push({
     label: "←   Back to mode select",
     detail: "Return to game-mode picker",
-    description: ["Switch between Adventure and Cyber-Tech themes."],
+    description: ["Switch between Agents Aventure and Cyber-Tech themes."],
     tone: "gray",
     value: "back",
   });

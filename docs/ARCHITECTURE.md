@@ -19,7 +19,7 @@
 │    player.ts       Input-driven movement + abilities     │
 │    brain.ts        MockBrain + ClaudeBrain decisions     │
 │    avatars.ts      Class specs, abilities, diet rules    │
-│    themes.ts       Adventure / Bugs tile + icon sets     │
+│    themes.ts       Agents Aventure / Bugs tile + icon sets │
 │    process_monitor.ts  Claude PID discovery + CPU state  │
 │    bridge.ts       .agent_sync.json file-bridge poller   │
 │    entity.ts       Base entity types (Bug, NPC, Weapon…) │
@@ -89,7 +89,7 @@ Fog of war: revealed area only follows the player. Agents and fairies are render
 
 | Mode | Default |
 |------|---------|
-| Adventure | Enabled — unrevealed tiles show `░░`, radius 8 around player |
+| Agents Aventure | Enabled — unrevealed tiles show `░░`, radius 8 around player |
 | Bugs | Disabled — full map visible from start |
 
 Toggle in-game with the `👁ALL` indicator (via `toggleFog()`). When fog is off, the HUD shows a `👁ALL` badge.
